@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ProofBase API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Product listing operations
+  - name: feedback
+    description: Feedback operations
+  - name: dashboard
+    description: Founder dashboard operations
+  - name: ai
+    description: AI-powered insights
 paths:
   /healthz:
     get:
@@ -24,6 +32,239 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [trending, newest, top_rated]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a new product listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/trending:
+    get:
+      operationId: getTrendingProducts
+      tags: [products]
+      summary: Get trending products
+      responses:
+        "200":
+          description: Trending products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductBody"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Product deleted
+
+  /products/{id}/feedback:
+    get:
+      operationId: getProductFeedback
+      tags: [feedback]
+      summary: Get all feedback for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+    post:
+      operationId: submitFeedback
+      tags: [feedback]
+      summary: Submit feedback for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedbackBody"
+      responses:
+        "201":
+          description: Feedback submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  /products/{id}/stats:
+    get:
+      operationId: getProductStats
+      tags: [products]
+      summary: Get product stats (avg rating, feedback counts, would-pay ratio)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductStats"
+
+  /products/{id}/summarize:
+    post:
+      operationId: summarizeProductFeedback
+      tags: [ai]
+      summary: Generate AI summary of product feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI-generated feedback summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackSummary"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get founder dashboard data
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+
+  /dashboard/products:
+    get:
+      operationId: getDashboardProducts
+      tags: [dashboard]
+      summary: Get all products owned by the authenticated founder
+      responses:
+        "200":
+          description: Founder products with stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductWithStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +275,274 @@ components:
       required:
         - status
 
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        founderClerkId:
+          type: string
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        websiteUrl:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        category:
+          type: string
+        feedbackCount:
+          type: integer
+        avgRating:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - founderClerkId
+        - name
+        - tagline
+        - description
+        - category
+        - feedbackCount
+        - createdAt
+        - updatedAt
+
+    CreateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        websiteUrl:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        category:
+          type: string
+      required:
+        - name
+        - tagline
+        - description
+        - category
+
+    UpdateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        websiteUrl:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        category:
+          type: string
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        reviewerClerkId:
+          type: ["string", "null"]
+        liked:
+          type: string
+        confused:
+          type: string
+        missing:
+          type: string
+        wouldPay:
+          type: boolean
+        rating:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - productId
+        - liked
+        - confused
+        - missing
+        - wouldPay
+        - rating
+        - createdAt
+
+    CreateFeedbackBody:
+      type: object
+      properties:
+        liked:
+          type: string
+        confused:
+          type: string
+        missing:
+          type: string
+        wouldPay:
+          type: boolean
+        rating:
+          type: integer
+      required:
+        - liked
+        - confused
+        - missing
+        - wouldPay
+        - rating
+
+    ProductStats:
+      type: object
+      properties:
+        productId:
+          type: integer
+        totalFeedback:
+          type: integer
+        avgRating:
+          type: ["number", "null"]
+        wouldPayCount:
+          type: integer
+        wouldPayRatio:
+          type: ["number", "null"]
+        ratingDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/RatingBucket"
+      required:
+        - productId
+        - totalFeedback
+        - wouldPayCount
+
+    RatingBucket:
+      type: object
+      properties:
+        rating:
+          type: integer
+        count:
+          type: integer
+      required:
+        - rating
+        - count
+
+    FeedbackSummary:
+      type: object
+      properties:
+        productId:
+          type: integer
+        strengths:
+          type: array
+          items:
+            type: string
+        weaknesses:
+          type: array
+          items:
+            type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+        overallSentiment:
+          type: string
+        generatedAt:
+          type: string
+      required:
+        - productId
+        - strengths
+        - weaknesses
+        - suggestions
+        - overallSentiment
+        - generatedAt
+
+    DashboardData:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+        totalFeedback:
+          type: integer
+        avgRating:
+          type: ["number", "null"]
+        recentFeedback:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackWithProduct"
+        topProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductWithStats"
+      required:
+        - totalProducts
+        - totalFeedback
+        - recentFeedback
+        - topProducts
+
+    FeedbackWithProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        liked:
+          type: string
+        confused:
+          type: string
+        missing:
+          type: string
+        wouldPay:
+          type: boolean
+        rating:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - productId
+        - productName
+        - liked
+        - confused
+        - missing
+        - wouldPay
+        - rating
+        - createdAt
+
+    ProductWithStats:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        tagline:
+          type: string
+        category:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        feedbackCount:
+          type: integer
+        avgRating:
+          type: ["number", "null"]
+        wouldPayRatio:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - tagline
+        - category
+        - feedbackCount
+        - createdAt
