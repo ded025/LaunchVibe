@@ -1,8 +1,8 @@
 {
   "version": 2,
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm install --no-frozen-lockfile && pnpm --filter @workspace/proofbase run build",
   "outputDirectory": "artifacts/proofbase/dist/public",
-  "installCommand": "pnpm install --no-frozen-lockfile",
   "framework": null,
   "rewrites": [
     { "source": "/((?!assets|.*\\..*).*)", "destination": "/index.html" }
@@ -10,13 +10,15 @@
   "env": {
     "PORT": "3000",
     "BASE_PATH": "/",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "CI": "false"
   },
   "build": {
     "env": {
       "PORT": "3000",
       "BASE_PATH": "/",
-      "NODE_ENV": "production"
+      "NODE_ENV": "production",
+      "CI": "false"
     }
   }
 }
