@@ -123,67 +123,69 @@ export default function ProductDetail() {
                     </Button>
                   )}
                   <Show when="signed-in">
-                    <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">Give Feedback</Button>
-                      </DialogTrigger>
-                      <DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] bg-card border-border">
-                        <DialogHeader>
-                          <DialogTitle>Feedback for {product.name}</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid gap-2">
-                            <Label>What did you like?</Label>
-                            <Textarea
-                              value={feedbackForm.liked}
-                              onChange={(e) => setFeedbackForm({ ...feedbackForm, liked: e.target.value })}
-                              placeholder="What stood out to you..."
-                              className="bg-background"
-                            />
+                    <>
+                      <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">Give Feedback</Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] bg-card border-border">
+                          <DialogHeader>
+                            <DialogTitle>Feedback for {product.name}</DialogTitle>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                              <Label>What did you like?</Label>
+                              <Textarea
+                                value={feedbackForm.liked}
+                                onChange={(e) => setFeedbackForm({ ...feedbackForm, liked: e.target.value })}
+                                placeholder="What stood out to you..."
+                                className="bg-background"
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label>What confused you?</Label>
+                              <Textarea
+                                value={feedbackForm.confused}
+                                onChange={(e) => setFeedbackForm({ ...feedbackForm, confused: e.target.value })}
+                                placeholder="What wasn't clear..."
+                                className="bg-background"
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label>What is missing?</Label>
+                              <Textarea
+                                value={feedbackForm.missing}
+                                onChange={(e) => setFeedbackForm({ ...feedbackForm, missing: e.target.value })}
+                                placeholder="What features do you wish it had..."
+                                className="bg-background"
+                              />
+                            </div>
+                            <div className="grid gap-2 pt-2">
+                              <Label>Rating ({feedbackForm.rating}/5)</Label>
+                              <Slider
+                                value={[feedbackForm.rating]}
+                                max={5} min={1} step={1}
+                                onValueChange={([val]) => setFeedbackForm({ ...feedbackForm, rating: val })}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between pt-2">
+                              <Label>Would you pay for this?</Label>
+                              <Switch
+                                checked={feedbackForm.wouldPay}
+                                onCheckedChange={(checked) => setFeedbackForm({ ...feedbackForm, wouldPay: checked })}
+                              />
+                            </div>
+                            <Button
+                              onClick={() => submitFeedback.mutate({ id, data: feedbackForm })}
+                              disabled={submitFeedback.isPending || !feedbackForm.liked}
+                              className="mt-2"
+                            >
+                              {submitFeedback.isPending ? "Submitting…" : "Submit Feedback (+5 pts)"}
+                            </Button>
                           </div>
-                          <div className="grid gap-2">
-                            <Label>What confused you?</Label>
-                            <Textarea
-                              value={feedbackForm.confused}
-                              onChange={(e) => setFeedbackForm({ ...feedbackForm, confused: e.target.value })}
-                              placeholder="What wasn't clear..."
-                              className="bg-background"
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label>What is missing?</Label>
-                            <Textarea
-                              value={feedbackForm.missing}
-                              onChange={(e) => setFeedbackForm({ ...feedbackForm, missing: e.target.value })}
-                              placeholder="What features do you wish it had..."
-                              className="bg-background"
-                            />
-                          </div>
-                          <div className="grid gap-2 pt-2">
-                            <Label>Rating ({feedbackForm.rating}/5)</Label>
-                            <Slider
-                              value={[feedbackForm.rating]}
-                              max={5} min={1} step={1}
-                              onValueChange={([val]) => setFeedbackForm({ ...feedbackForm, rating: val })}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between pt-2">
-                            <Label>Would you pay for this?</Label>
-                            <Switch
-                              checked={feedbackForm.wouldPay}
-                              onCheckedChange={(checked) => setFeedbackForm({ ...feedbackForm, wouldPay: checked })}
-                            />
-                          </div>
-                          <Button
-                            onClick={() => submitFeedback.mutate({ id, data: feedbackForm })}
-                            disabled={submitFeedback.isPending || !feedbackForm.liked}
-                            className="mt-2"
-                          >
-                            {submitFeedback.isPending ? "Submitting…" : "Submit Feedback (+5 pts)"}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogContent>
+                      </Dialog>
+                    </>
                   </Show>
                 </div>
               </div>
@@ -314,7 +316,6 @@ export default function ProductDetail() {
                           </span>
                         </div>
 
-                        {/* On mobile: stacked. On sm+: 3 columns */}
                         <div className="grid sm:grid-cols-3 gap-4">
                           <div>
                             <h4 className="text-xs font-semibold text-green-400 mb-1 uppercase tracking-wide">Loved</h4>
