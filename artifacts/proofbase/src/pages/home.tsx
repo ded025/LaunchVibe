@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
 import "leaflet/dist/leaflet.css";
 
-// Lazy-load map to avoid SSR issues
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 
 function StatusTag({ tag }: { tag?: string | null }) {
@@ -46,7 +45,7 @@ export default function Home() {
       <Nav />
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative py-32 px-4 overflow-hidden">
+        <section className="relative py-16 md:py-32 px-4 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#7C3AED]/10 to-transparent pointer-events-none" />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -54,18 +53,19 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center container mx-auto max-w-4xl relative z-10"
           >
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 text-foreground">
-              Get real feedback. <br className="hidden md:inline" />
+            <h1 className="text-4xl md:text-7xl font-bold tracking-tighter mb-6 md:mb-8 text-foreground">
+              Get real feedback.{" "}
+              <br className="hidden md:inline" />
               Build better products.
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed">
               ProofBase helps builders get structured feedback, real users, and actionable insights. A premium instrument for teams who take feedback seriously.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Button asChild size="lg" className="h-14 px-8 text-base bg-gradient-accent text-white border-0 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-all w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+              <Button asChild size="lg" className="h-12 md:h-14 px-8 text-base bg-gradient-accent text-white border-0 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-all w-full sm:w-auto">
                 <Link href="/sign-up">Start Listing</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base w-full sm:w-auto border-[#1A1A1A] hover:bg-[#111111]">
+              <Button asChild size="lg" variant="outline" className="h-12 md:h-14 px-8 text-base w-full sm:w-auto border-[#1A1A1A] hover:bg-[#111111]">
                 <Link href="/explore">Explore Products</Link>
               </Button>
             </div>
@@ -73,15 +73,15 @@ export default function Home() {
         </section>
 
         {/* Live Startup Map */}
-        <section className="py-16 bg-[#0D0D0F] border-y border-[#1A1A1A]">
+        <section className="py-10 md:py-16 bg-[#0D0D0F] border-y border-[#1A1A1A]">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold tracking-tight mb-2">Live Startup Map</h2>
+            <div className="text-center mb-6">
+              <h2 className="text-xl md:text-2xl font-bold tracking-tight mb-1">Live Startup Map</h2>
               <p className="text-muted-foreground text-sm">Where builders on ProofBase are located.</p>
             </div>
 
             {hasMapData ? (
-              <div className="rounded-2xl overflow-hidden border border-[#1A1A1A] shadow-[0_0_40px_rgba(124,58,237,0.08)]" style={{ height: 360 }}>
+              <div className="rounded-2xl overflow-hidden border border-[#1A1A1A] shadow-[0_0_40px_rgba(124,58,237,0.08)]" style={{ height: 280 }}>
                 <MapContainer
                   center={[20, 0]}
                   zoom={2}
@@ -110,14 +110,14 @@ export default function Home() {
                 </MapContainer>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#1A1A1A] h-48 flex flex-col items-center justify-center text-muted-foreground">
+              <div className="rounded-2xl border border-dashed border-[#1A1A1A] h-40 flex flex-col items-center justify-center text-muted-foreground">
                 <span className="text-3xl mb-2">🗺️</span>
-                <p className="text-sm">No location data yet. Products with locations will appear here.</p>
+                <p className="text-sm px-4 text-center">No location data yet. Products with locations will appear here.</p>
               </div>
             )}
 
             {cityGroups.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2 justify-center">
+              <div className="mt-5 flex flex-wrap gap-2 justify-center">
                 {cityGroups.map(([city, count]) => (
                   <span
                     key={city}
@@ -132,14 +132,14 @@ export default function Home() {
         </section>
 
         {/* Trending Products */}
-        <section className="py-24 bg-[#111111] border-y border-[#1A1A1A]">
+        <section className="py-14 md:py-24 bg-[#111111] border-y border-[#1A1A1A]">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight mb-4">Trending Products</h2>
-              <p className="text-muted-foreground">See what other ambitious founders are building.</p>
+            <div className="text-center mb-10 md:mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">Trending Products</h2>
+              <p className="text-muted-foreground text-sm md:text-base">See what other ambitious founders are building.</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
               {trendingProducts.slice(0, 3).map((product, i) => (
                 <motion.div
                   key={product.id}
@@ -150,28 +150,28 @@ export default function Home() {
                 >
                   <Link href={`/products/${product.id}`}>
                     <Card className="h-full bg-card hover:scale-[1.02] transition-transform duration-300 cursor-pointer border-[#1A1A1A] hover:border-primary/30">
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-bold line-clamp-1">{product.name}</h3>
-                          <Badge variant="outline" className="bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]/20 shrink-0">
+                      <CardContent className="p-5 md:p-6">
+                        <div className="flex justify-between items-start mb-2 gap-2">
+                          <h3 className="text-lg md:text-xl font-bold line-clamp-1">{product.name}</h3>
+                          <Badge variant="outline" className="bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]/20 shrink-0 text-xs">
                             {product.category}
                           </Badge>
                         </div>
-                        <div className="flex gap-2 mb-3">
+                        <div className="flex gap-2 mb-3 flex-wrap">
                           <StatusTag tag={(product as any).statusTag} />
                           {(product as any).city && (
                             <span className="text-xs text-muted-foreground">📍 {(product as any).city}</span>
                           )}
                         </div>
-                        <p className="text-muted-foreground text-sm line-clamp-2 mb-6">{product.tagline}</p>
+                        <p className="text-muted-foreground text-sm line-clamp-2 mb-5">{product.tagline}</p>
                         <div className="flex items-center justify-between text-sm pt-4 border-t border-[#1A1A1A]">
-                          <span className="text-muted-foreground">{product.feedbackCount} feedback</span>
-                          <div className="flex items-center gap-3">
+                          <span className="text-muted-foreground text-xs">{product.feedbackCount} feedback</span>
+                          <div className="flex items-center gap-2">
                             {(product as any).score != null && (
                               <span className="text-xs font-mono text-[#7C3AED]">★ {Number((product as any).score).toFixed(2)}</span>
                             )}
                             {product.avgRating && (
-                              <span className="text-yellow-500 flex items-center gap-1">
+                              <span className="text-yellow-500 flex items-center gap-1 text-xs">
                                 ★ {product.avgRating.toFixed(1)}
                               </span>
                             )}
@@ -184,7 +184,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="text-center mt-12">
+            <div className="text-center mt-10">
               <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
                 <Link href="/explore">View all products →</Link>
               </Button>
@@ -193,15 +193,15 @@ export default function Home() {
         </section>
 
         {/* How it works */}
-        <section className="py-32 px-4 container mx-auto max-w-5xl">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">Designed for signal, not noise.</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <section className="py-20 md:py-32 px-4 container mx-auto max-w-5xl">
+          <div className="text-center mb-14 md:mb-20">
+            <h2 className="text-2xl md:text-5xl font-bold tracking-tight mb-4 md:mb-6">Designed for signal, not noise.</h2>
+            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Get past the shallow compliments and uncover exactly what you need to build next.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-10 md:gap-12">
             {[
               { num: "01", title: "List with intent", desc: "Create a focused listing that tells users exactly what you want them to test and evaluate." },
               { num: "02", title: "Structured insights", desc: "No free-form essays. We ask what they loved, what confused them, and what's missing." },
@@ -215,26 +215,26 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="relative"
               >
-                <div className="text-6xl font-bold text-[#1A1A1A] mb-4">{step.num}</div>
-                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
+                <div className="text-5xl md:text-6xl font-bold text-[#1A1A1A] mb-3">{step.num}</div>
+                <h3 className="text-lg md:text-xl font-bold mb-2">{step.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{step.desc}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="py-32 bg-gradient-to-t from-[#111111] to-[#0B0B0C] border-t border-[#1A1A1A]">
+        <section className="py-20 md:py-32 bg-gradient-to-t from-[#111111] to-[#0B0B0C] border-t border-[#1A1A1A]">
           <div className="container mx-auto px-4 text-center max-w-3xl">
-            <h2 className="text-4xl font-bold mb-8">Stop guessing what users want.</h2>
-            <Button asChild size="lg" className="h-14 px-10 text-lg bg-gradient-accent text-white border-0">
+            <h2 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8">Stop guessing what users want.</h2>
+            <Button asChild size="lg" className="h-12 md:h-14 px-8 md:px-10 text-base md:text-lg bg-gradient-accent text-white border-0 w-full sm:w-auto">
               <Link href="/sign-up">Get Started Today</Link>
             </Button>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-[#1A1A1A] bg-[#0B0B0C] py-12 text-center text-muted-foreground text-sm">
+      <footer className="border-t border-[#1A1A1A] bg-[#0B0B0C] py-8 text-center text-muted-foreground text-sm">
         <p>© {new Date().getFullYear()} ProofBase. A premium feedback instrument.</p>
       </footer>
     </div>

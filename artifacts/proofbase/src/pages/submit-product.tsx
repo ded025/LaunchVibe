@@ -106,7 +106,6 @@ export default function SubmitProduct() {
   };
 
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
-
   const totalSteps = 5;
 
   // Feedback economy gate
@@ -114,15 +113,15 @@ export default function SubmitProduct() {
     return (
       <div className="min-h-[100dvh] flex flex-col bg-[#0B0B0C]">
         <Nav />
-        <main className="flex-1 container mx-auto px-4 py-12 max-w-xl flex flex-col items-center justify-center text-center">
+        <main className="flex-1 container mx-auto px-4 py-12 max-w-md flex flex-col items-center justify-center text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="text-5xl mb-6">🔒</div>
-            <h1 className="text-2xl font-bold mb-4">Give Before You List</h1>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              ProofBase is a community built on reciprocity. Before listing a product,
-              you need to give feedback to at least <strong className="text-foreground">{FEEDBACK_REQUIRED} products</strong>.
-              You've given <strong className="text-primary">{userFeedbackCount}</strong> so far —
-              just <strong className="text-foreground">{feedbackNeeded} more</strong> to unlock listing.
+            <div className="text-5xl mb-5">🔒</div>
+            <h1 className="text-xl md:text-2xl font-bold mb-3">Give Before You List</h1>
+            <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
+              ProofBase is built on reciprocity. Give feedback to at least{" "}
+              <strong className="text-foreground">{FEEDBACK_REQUIRED} products</strong> first.
+              You've given <strong className="text-primary">{userFeedbackCount}</strong> —
+              just <strong className="text-foreground">{feedbackNeeded} more</strong> to unlock.
             </p>
             <div className="w-full bg-muted rounded-full h-2 mb-8">
               <div
@@ -130,7 +129,7 @@ export default function SubmitProduct() {
                 style={{ width: `${Math.min(100, (userFeedbackCount / FEEDBACK_REQUIRED) * 100)}%` }}
               />
             </div>
-            <Button asChild className="bg-primary text-primary-foreground">
+            <Button asChild className="bg-primary text-primary-foreground w-full">
               <a href="/explore">Explore & Give Feedback</a>
             </Button>
           </motion.div>
@@ -142,23 +141,23 @@ export default function SubmitProduct() {
   return (
     <div className="min-h-[100dvh] flex flex-col bg-[#0B0B0C]">
       <Nav />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-2xl flex flex-col">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-2xl flex flex-col">
         <div className="mb-2 flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">List a Product</h1>
-          <span className="text-sm text-muted-foreground">Step {step} of {totalSteps}</span>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">List a Product</h1>
+          <span className="text-sm text-muted-foreground">Step {step}/{totalSteps}</span>
         </div>
 
-        <div className="flex gap-2 mb-8">
+        <div className="flex gap-1.5 mb-6 md:mb-8">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${step > i ? "bg-primary" : "bg-muted"}`} />
           ))}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 border border-border rounded-xl bg-card flex-1 flex flex-col gap-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-5 md:p-8 border border-border rounded-xl bg-card flex-1 flex flex-col gap-5">
 
           {/* Step 1: Basic Info */}
           <div className={step === 1 ? "block space-y-4" : "hidden"}>
-            <h2 className="text-xl font-semibold mb-2">Basic Info</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">Basic Info</h2>
             <div className="space-y-2">
               <Label>Product Name</Label>
               <Input {...register("name")} placeholder="e.g. ProofBase" className="bg-background border-border" />
@@ -173,13 +172,13 @@ export default function SubmitProduct() {
 
           {/* Step 2: Description */}
           <div className={step === 2 ? "block space-y-4" : "hidden"}>
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">Description</h2>
             <div className="space-y-2">
               <Label>Product Description</Label>
               <Textarea
                 {...register("description")}
                 placeholder="Tell us what makes your product special..."
-                className="min-h-[200px] bg-background border-border"
+                className="min-h-[180px] md:min-h-[200px] bg-background border-border"
               />
               {errors.description && <p className="text-destructive text-sm">{errors.description.message}</p>}
             </div>
@@ -187,7 +186,7 @@ export default function SubmitProduct() {
 
           {/* Step 3: Details */}
           <div className={step === 3 ? "block space-y-4" : "hidden"}>
-            <h2 className="text-xl font-semibold mb-2">Details</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">Details</h2>
             <div className="space-y-2">
               <Label>Category</Label>
               <Controller
@@ -221,7 +220,9 @@ export default function SubmitProduct() {
 
           {/* Step 4: Location */}
           <div className={step === 4 ? "block space-y-4" : "hidden"}>
-            <h2 className="text-xl font-semibold mb-2">Location <span className="text-muted-foreground text-base font-normal">(Optional)</span></h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">
+              Location <span className="text-muted-foreground text-sm font-normal">(Optional)</span>
+            </h2>
             <p className="text-sm text-muted-foreground">
               Adding a location puts your product on the global startup map.
             </p>
@@ -230,7 +231,7 @@ export default function SubmitProduct() {
               <Input
                 value={locationQuery}
                 onChange={(e) => { setLocationQuery(e.target.value); setShowLocationResults(true); }}
-                placeholder="e.g. San Francisco, London, Berlin..."
+                placeholder="e.g. San Francisco, London…"
                 className="bg-background border-border"
               />
               {showLocationResults && locationQuery.length >= 3 && (
@@ -255,7 +256,7 @@ export default function SubmitProduct() {
                         }}
                       >
                         <div className="font-medium">{r.city || r.displayName.split(",")[0]}</div>
-                        <div className="text-muted-foreground text-xs">{r.displayName}</div>
+                        <div className="text-muted-foreground text-xs truncate">{r.displayName}</div>
                       </button>
                     ))
                   )}
@@ -265,10 +266,10 @@ export default function SubmitProduct() {
             {selectedCity && (
               <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm">
                 <span>📍</span>
-                <span className="text-foreground">{selectedCity}{selectedCountry ? `, ${selectedCountry}` : ""}</span>
+                <span className="text-foreground truncate">{selectedCity}{selectedCountry ? `, ${selectedCountry}` : ""}</span>
                 <button
                   type="button"
-                  className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+                  className="ml-auto text-xs text-muted-foreground hover:text-foreground shrink-0"
                   onClick={() => { setValue("city", ""); setValue("country", ""); setValue("latitude", undefined); setValue("longitude", undefined); setLocationQuery(""); }}
                 >
                   Clear
@@ -279,7 +280,7 @@ export default function SubmitProduct() {
 
           {/* Step 5: Review */}
           <div className={step === 5 ? "block space-y-4" : "hidden"}>
-            <h2 className="text-xl font-semibold mb-2">Review & Submit</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">Review & Submit</h2>
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>Please review your details before submitting.</p>
               <p>Once submitted, your product will be live and ready to collect feedback.</p>
@@ -291,16 +292,16 @@ export default function SubmitProduct() {
             )}
           </div>
 
-          <div className="mt-auto pt-6 flex justify-between">
-            <Button type="button" variant="outline" onClick={prevStep} disabled={step === 1 || createProduct.isPending}>
+          <div className="mt-auto pt-5 flex justify-between gap-3">
+            <Button type="button" variant="outline" onClick={prevStep} disabled={step === 1 || createProduct.isPending} className="flex-1 sm:flex-none">
               Back
             </Button>
             {step < totalSteps ? (
-              <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={nextStep}>
-                Next Step
+              <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 sm:flex-none" onClick={nextStep}>
+                Next
               </Button>
             ) : (
-              <Button type="submit" disabled={createProduct.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button type="submit" disabled={createProduct.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 sm:flex-none">
                 {createProduct.isPending ? "Submitting…" : "Submit Product"}
               </Button>
             )}

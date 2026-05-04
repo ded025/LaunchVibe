@@ -79,33 +79,31 @@ export default function ProductDetail() {
 
   const isFounder = user?.id === product.founderClerkId;
   const p = product as any;
-
   const statusCfg = p.statusTag ? STATUS_CONFIG[p.statusTag] : null;
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-[#0B0B0C]">
       <Nav />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
 
           {/* Header */}
-          <header className="mb-12 border-b border-border pb-8">
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <header className="mb-8 md:mb-12 border-b border-border pb-6 md:pb-8">
+            <div className="flex flex-col gap-4">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 flex-wrap mb-2">
-                  <h1 className="text-4xl font-bold tracking-tight">{product.name}</h1>
-                  <Badge className="bg-primary/20 text-primary hover:bg-primary/30">{product.category}</Badge>
+                <div className="flex items-start gap-2 flex-wrap mb-2">
+                  <h1 className="text-2xl md:text-4xl font-bold tracking-tight">{product.name}</h1>
+                  <Badge className="bg-primary/20 text-primary hover:bg-primary/30 shrink-0">{product.category}</Badge>
                   {statusCfg && (
-                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${statusCfg.cls}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium shrink-0 ${statusCfg.cls}`}>
                       {statusCfg.label}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xl text-muted-foreground max-w-2xl mb-3">{product.tagline}</p>
+                <p className="text-base md:text-xl text-muted-foreground mb-3">{product.tagline}</p>
 
-                {/* Location + score row */}
-                <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground mb-4">
                   {p.city && (
                     <span className="flex items-center gap-1">
                       📍 {p.city}{p.country ? `, ${p.country}` : ""}
@@ -117,110 +115,109 @@ export default function ProductDetail() {
                     </span>
                   )}
                 </div>
-              </div>
 
-              <div className="flex gap-3 shrink-0">
-                {product.websiteUrl && (
-                  <Button variant="outline" asChild>
-                    <a href={product.websiteUrl} target="_blank" rel="noreferrer">Visit Website</a>
-                  </Button>
-                )}
-
-                <Show when="signed-in">
-                  <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Give Feedback</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px] bg-card border-border">
-                      <DialogHeader>
-                        <DialogTitle>Feedback for {product.name}</DialogTitle>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label>What did you like?</Label>
-                          <Textarea
-                            value={feedbackForm.liked}
-                            onChange={(e) => setFeedbackForm({ ...feedbackForm, liked: e.target.value })}
-                            placeholder="What stood out to you..."
-                            className="bg-background"
-                          />
+                <div className="flex gap-2 flex-wrap">
+                  {product.websiteUrl && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={product.websiteUrl} target="_blank" rel="noreferrer">Visit Website</a>
+                    </Button>
+                  )}
+                  <Show when="signed-in">
+                    <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">Give Feedback</Button>
+                      </DialogTrigger>
+                      <DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] bg-card border-border">
+                        <DialogHeader>
+                          <DialogTitle>Feedback for {product.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                            <Label>What did you like?</Label>
+                            <Textarea
+                              value={feedbackForm.liked}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, liked: e.target.value })}
+                              placeholder="What stood out to you..."
+                              className="bg-background"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>What confused you?</Label>
+                            <Textarea
+                              value={feedbackForm.confused}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, confused: e.target.value })}
+                              placeholder="What wasn't clear..."
+                              className="bg-background"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>What is missing?</Label>
+                            <Textarea
+                              value={feedbackForm.missing}
+                              onChange={(e) => setFeedbackForm({ ...feedbackForm, missing: e.target.value })}
+                              placeholder="What features do you wish it had..."
+                              className="bg-background"
+                            />
+                          </div>
+                          <div className="grid gap-2 pt-2">
+                            <Label>Rating ({feedbackForm.rating}/5)</Label>
+                            <Slider
+                              value={[feedbackForm.rating]}
+                              max={5} min={1} step={1}
+                              onValueChange={([val]) => setFeedbackForm({ ...feedbackForm, rating: val })}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between pt-2">
+                            <Label>Would you pay for this?</Label>
+                            <Switch
+                              checked={feedbackForm.wouldPay}
+                              onCheckedChange={(checked) => setFeedbackForm({ ...feedbackForm, wouldPay: checked })}
+                            />
+                          </div>
+                          <Button
+                            onClick={() => submitFeedback.mutate({ id, data: feedbackForm })}
+                            disabled={submitFeedback.isPending || !feedbackForm.liked}
+                            className="mt-2"
+                          >
+                            {submitFeedback.isPending ? "Submitting…" : "Submit Feedback (+5 pts)"}
+                          </Button>
                         </div>
-                        <div className="grid gap-2">
-                          <Label>What confused you?</Label>
-                          <Textarea
-                            value={feedbackForm.confused}
-                            onChange={(e) => setFeedbackForm({ ...feedbackForm, confused: e.target.value })}
-                            placeholder="What wasn't clear..."
-                            className="bg-background"
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label>What is missing?</Label>
-                          <Textarea
-                            value={feedbackForm.missing}
-                            onChange={(e) => setFeedbackForm({ ...feedbackForm, missing: e.target.value })}
-                            placeholder="What features do you wish it had..."
-                            className="bg-background"
-                          />
-                        </div>
-                        <div className="grid gap-2 pt-2">
-                          <Label>Rating ({feedbackForm.rating}/5)</Label>
-                          <Slider
-                            value={[feedbackForm.rating]}
-                            max={5} min={1} step={1}
-                            onValueChange={([val]) => setFeedbackForm({ ...feedbackForm, rating: val })}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between pt-2">
-                          <Label>Would you pay for this?</Label>
-                          <Switch
-                            checked={feedbackForm.wouldPay}
-                            onCheckedChange={(checked) => setFeedbackForm({ ...feedbackForm, wouldPay: checked })}
-                          />
-                        </div>
-                        <Button
-                          onClick={() => submitFeedback.mutate({ id, data: feedbackForm })}
-                          disabled={submitFeedback.isPending || !feedbackForm.liked}
-                          className="mt-4"
-                        >
-                          {submitFeedback.isPending ? "Submitting…" : "Submit Feedback (+5 pts)"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </Show>
+                      </DialogContent>
+                    </Dialog>
+                  </Show>
+                </div>
               </div>
             </div>
 
-            <div className="mt-8 text-muted-foreground whitespace-pre-wrap leading-relaxed">
+            <div className="mt-5 text-muted-foreground leading-relaxed text-sm md:text-base">
               {product.description}
             </div>
           </header>
 
-          {/* Stats */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {/* Stats — 3 columns even on mobile, compact */}
+          <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-12">
             <Card className="bg-card/50 border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Avg Rating</CardTitle>
+              <CardHeader className="pb-1 pt-4 px-3 md:px-6 md:pb-2 md:pt-6">
+                <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wide">Avg Rating</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.avgRating?.toFixed(1) ?? "—"} <span className="text-lg text-yellow-500">★</span></div>
+              <CardContent className="px-3 pb-4 md:px-6">
+                <div className="text-xl md:text-3xl font-bold">{stats?.avgRating?.toFixed(1) ?? "—"} <span className="text-sm md:text-lg text-yellow-500">★</span></div>
               </CardContent>
             </Card>
             <Card className="bg-card/50 border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Feedback</CardTitle>
+              <CardHeader className="pb-1 pt-4 px-3 md:px-6 md:pb-2 md:pt-6">
+                <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wide">Feedback</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.totalFeedback ?? 0}</div>
+              <CardContent className="px-3 pb-4 md:px-6">
+                <div className="text-xl md:text-3xl font-bold">{stats?.totalFeedback ?? 0}</div>
               </CardContent>
             </Card>
             <Card className="bg-card/50 border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Would Pay</CardTitle>
+              <CardHeader className="pb-1 pt-4 px-3 md:px-6 md:pb-2 md:pt-6">
+                <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wide">Would Pay</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
+              <CardContent className="px-3 pb-4 md:px-6">
+                <div className="text-xl md:text-3xl font-bold">
                   {stats?.wouldPayRatio != null ? `${Math.round(stats.wouldPayRatio * 100)}%` : "—"}
                 </div>
               </CardContent>
@@ -229,15 +226,16 @@ export default function ProductDetail() {
 
           {/* AI Insights (founder only) */}
           {isFounder && (
-            <div className="mb-12 p-6 border border-primary/30 rounded-xl bg-primary/5">
-              <div className="flex justify-between items-start mb-4">
+            <div className="mb-8 md:mb-12 p-4 md:p-6 border border-primary/30 rounded-xl bg-primary/5">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-primary mb-1">AI Insights</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-primary mb-1">AI Insights</h3>
                   <p className="text-sm text-muted-foreground">Synthesize all feedback into actionable insights.</p>
                 </div>
                 <Button
                   variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  size="sm"
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground shrink-0"
                   onClick={() => summarize.mutate({ id })}
                   disabled={summarize.isPending}
                 >
@@ -253,21 +251,21 @@ export default function ProductDetail() {
                       <span className="font-medium text-primary capitalize">{summarize.data.overallSentiment}</span>
                     </div>
                   )}
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-3 gap-4 md:gap-6">
                     <div>
-                      <h4 className="font-semibold text-green-400 mb-2">Strengths</h4>
+                      <h4 className="font-semibold text-green-400 mb-2 text-sm">Strengths</h4>
                       <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                         {summarize.data.strengths.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-yellow-400 mb-2">Weaknesses</h4>
+                      <h4 className="font-semibold text-yellow-400 mb-2 text-sm">Weaknesses</h4>
                       <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                         {summarize.data.weaknesses.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-400 mb-2">Suggestions</h4>
+                      <h4 className="font-semibold text-blue-400 mb-2 text-sm">Suggestions</h4>
                       <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                         {summarize.data.suggestions.map((s, i) => <li key={i}>{s}</li>)}
                       </ul>
@@ -280,13 +278,13 @@ export default function ProductDetail() {
 
           {/* Feedback list */}
           <div>
-            <h2 className="text-2xl font-bold mb-6">
+            <h2 className="text-xl md:text-2xl font-bold mb-5">
               Recent Feedback
               {!feedbackLoading && feedback.length > 0 && (
                 <span className="text-base font-normal text-muted-foreground ml-2">({feedback.length})</span>
               )}
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {feedback.length === 0 ? (
                 <p className="text-muted-foreground">No feedback yet. Be the first!</p>
               ) : (
@@ -298,9 +296,9 @@ export default function ProductDetail() {
                     transition={{ delay: i * 0.04 }}
                   >
                     <Card className="border-border/50 shadow-none">
-                      <CardContent className="pt-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="flex text-yellow-500">
+                      <CardContent className="pt-4 md:pt-6 px-4 md:px-6">
+                        <div className="flex items-center gap-2 mb-4 flex-wrap">
+                          <div className="flex text-yellow-500 text-sm">
                             {Array.from({ length: 5 }).map((_, j) => (
                               <span key={j} className={j < item.rating ? "opacity-100" : "opacity-20"}>★</span>
                             ))}
@@ -316,17 +314,18 @@ export default function ProductDetail() {
                           </span>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-6">
+                        {/* On mobile: stacked. On sm+: 3 columns */}
+                        <div className="grid sm:grid-cols-3 gap-4">
                           <div>
-                            <h4 className="text-sm font-semibold text-green-400 mb-2">Loved</h4>
+                            <h4 className="text-xs font-semibold text-green-400 mb-1 uppercase tracking-wide">Loved</h4>
                             <p className="text-sm text-muted-foreground">{item.liked}</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-semibold text-yellow-400 mb-2">Confused</h4>
+                            <h4 className="text-xs font-semibold text-yellow-400 mb-1 uppercase tracking-wide">Confused</h4>
                             <p className="text-sm text-muted-foreground">{item.confused}</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-semibold text-blue-400 mb-2">Missing</h4>
+                            <h4 className="text-xs font-semibold text-blue-400 mb-1 uppercase tracking-wide">Missing</h4>
                             <p className="text-sm text-muted-foreground">{item.missing}</p>
                           </div>
                         </div>
