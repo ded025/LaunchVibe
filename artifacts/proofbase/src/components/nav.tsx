@@ -31,7 +31,11 @@ export function Nav() {
     <nav className="border-b border-border bg-background sticky top-0 z-50">
       <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
         <div className="flex items-center gap-5">
-          <Link href="/" className="font-bold text-base md:text-lg tracking-tight text-foreground shrink-0" onClick={close}>
+          <Link
+            href="/"
+            className="font-bold text-base md:text-lg tracking-tight text-foreground shrink-0"
+            onClick={close}
+          >
             ProofBase
           </Link>
           <div className="hidden md:flex items-center gap-5">
@@ -43,18 +47,29 @@ export function Nav() {
 
         <div className="hidden md:flex items-center gap-4">
           <Show when="signed-out">
-            <Link href="/sign-in" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              Sign In
-            </Link>
-            <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link href="/sign-up">Start Listing</Link>
-            </Button>
+            <>
+              <Link
+                href="/sign-in"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                Sign In
+              </Link>
+              <Button
+                asChild
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Link href="/sign-up">Start Listing</Link>
+              </Button>
+            </>
           </Show>
           <Show when="signed-in">
-            {navLink("/dashboard", "Dashboard")}
-            <Button variant="ghost" size="sm" onClick={() => signOut()}>
-              Sign out
-            </Button>
+            <>
+              {navLink("/dashboard", "Dashboard")}
+              <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                Sign out
+              </Button>
+            </>
           </Show>
         </div>
 
@@ -73,21 +88,42 @@ export function Nav() {
           {navLink("/leaderboard", "Leaderboard", close)}
           {navLink("/feed", "Feed", close)}
           <Show when="signed-in">
-            {navLink("/dashboard", "Dashboard", close)}
+            <>{navLink("/dashboard", "Dashboard", close)}</>
           </Show>
           <div className="pt-2 border-t border-border flex flex-col gap-3">
             <Show when="signed-out">
-              <Link href="/sign-in" onClick={close} className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Sign In
-              </Link>
-              <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 w-full">
-                <Link href="/sign-up" onClick={close}>Start Listing</Link>
-              </Button>
+              <>
+                <Link
+                  href="/sign-in"
+                  onClick={close}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                >
+                  Sign In
+                </Link>
+                <Button
+                  asChild
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+                >
+                  <Link href="/sign-up" onClick={close}>
+                    Start Listing
+                  </Link>
+                </Button>
+              </>
             </Show>
             <Show when="signed-in">
-              <Button variant="outline" size="sm" className="w-full" onClick={() => { signOut(); close(); }}>
-                Sign out
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    signOut();
+                    close();
+                  }}
+                >
+                  Sign out
+                </Button>
+              </>
             </Show>
           </div>
         </div>
