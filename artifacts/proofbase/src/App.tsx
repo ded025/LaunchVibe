@@ -72,17 +72,12 @@ function ClerkQueryClientCacheInvalidator() {
   return null;
 }
 
+// Auth logic change: show Home to everyone; only redirect signed-in users
+// who manually hit "/" and press dashboard button.
+// Browse + product detail: no login required.
+// Dashboard / submit-product: protected inside their own pages.
 function HomeRedirect() {
-  return (
-    <>
-      <Show when="signed-in">
-        <Redirect to="/dashboard" />
-      </Show>
-      <Show when="signed-out">
-        <Home />
-      </Show>
-    </>
-  );
+  return <Home />;
 }
 
 function SignInPage() {
