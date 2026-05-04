@@ -1,13 +1,11 @@
 import { db, productsTable, feedbackTable } from "@workspace/db";
+import { logger } from "./lib/logger";
 
-async function seed() {
-  console.log("Seeding database...");
+export async function seedIfEmpty() {
+  const existing = await db.select().from(productsTable);
+  if (existing.length > 0) return;
 
-  const existingProducts = await db.select().from(productsTable);
-  if (existingProducts.length > 0) {
-    console.log("Database already seeded, skipping.");
-    return;
-  }
+  logger.info("Seeding demo data…");
 
   const [p1] = await db.insert(productsTable).values({
     founderClerkId: "seed_founder_1",
@@ -16,8 +14,14 @@ async function seed() {
     description: "FlowSync connects your tools and automates repetitive tasks so your team can focus on what matters.",
     websiteUrl: "https://flowsync.io",
     category: "Productivity",
+    city: "San Francisco",
+    country: "USA",
+    latitude: 37.7749,
+    longitude: -122.4194,
     feedbackCount: 3,
     avgRating: 4.3,
+    score: 2.10,
+    statusTag: "launching",
   }).returning();
 
   const [p2] = await db.insert(productsTable).values({
@@ -27,8 +31,14 @@ async function seed() {
     description: "The connected workspace where better, faster work happens. Now with built-in AI to help you work smarter.",
     websiteUrl: "https://notion.so",
     category: "Productivity",
+    city: "New York",
+    country: "USA",
+    latitude: 40.7128,
+    longitude: -74.0060,
     feedbackCount: 2,
     avgRating: 4.5,
+    score: 1.80,
+    statusTag: "launching",
   }).returning();
 
   const [p3] = await db.insert(productsTable).values({
@@ -38,8 +48,14 @@ async function seed() {
     description: "The easiest way to start an internet business. Incorporate your company and get access to Stripe, AWS, and more.",
     websiteUrl: "https://stripe.com/atlas",
     category: "Finance",
+    city: "London",
+    country: "UK",
+    latitude: 51.5074,
+    longitude: -0.1278,
     feedbackCount: 1,
     avgRating: 4.0,
+    score: 1.20,
+    statusTag: "launching",
   }).returning();
 
   await db.insert(feedbackTable).values([
@@ -93,7 +109,5 @@ async function seed() {
     },
   ]);
 
-  console.log("Seeding complete!");
+  logger.info("Demo seed complete.");
 }
-
-seed().catch(console.error).finally(() => process.exit(0));
