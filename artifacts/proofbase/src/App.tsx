@@ -1,8 +1,8 @@
-import { Switch, Route, Redirect, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from "@clerk/react";
+import { SignIn, SignUp, useClerk } from "@clerk/react";
 import { shadcn } from "@clerk/themes";
 import { useEffect, useRef } from "react";
 
@@ -19,13 +19,7 @@ const queryClient = new QueryClient();
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!clerkPubKey) {
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY in .env file");
-}
-
-const clerkAppearance = {
+export const clerkAppearance = {
   theme: shadcn,
   cssLayerName: "clerk",
   options: {
@@ -72,14 +66,6 @@ function ClerkQueryClientCacheInvalidator() {
   return null;
 }
 
-// Auth logic change: show Home to everyone; only redirect signed-in users
-// who manually hit "/" and press dashboard button.
-// Browse + product detail: no login required.
-// Dashboard / submit-product: protected inside their own pages.
-function HomeRedirect() {
-  return <Home />;
-}
-
 function SignInPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-12">
@@ -96,38 +82,23 @@ function SignUpPage() {
   );
 }
 
-function stripBase(path: string): string {
-  return basePath && path.startsWith(basePath) ? path.slice(basePath.length) || "/" : path;
-}
-
-function ClerkProviderWithRoutes() {
-  const [, setLocation] = useLocation();
-
+function Routes() {
   return (
-    <ClerkProvider
-      publishableKey={clerkPubKey}
-      appearance={clerkAppearance}
-      signInUrl={`${basePath}/sign-in`}
-      signUpUrl={`${basePath}/sign-up`}
-      routerPush={(to) => setLocation(stripBase(to))}
-      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
-    >
-      <QueryClientProvider client={queryClient}>
-        <ClerkQueryClientCacheInvalidator />
-        <Switch>
-          <Route path="/" component={HomeRedirect} />
-          <Route path="/explore" component={Explore} />
-          <Route path="/leaderboard" component={Leaderboard} />
-          <Route path="/feed" component={Feed} />
-          <Route path="/products/:id" component={ProductDetail} />
-          <Route path="/sign-in/*?" component={SignInPage} />
-          <Route path="/sign-up/*?" component={SignUpPage} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/dashboard/submit" component={SubmitProduct} />
-          <Route component={NotFound} />
-        </Switch>
-      </QueryClientProvider>
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <ClerkQueryClientCacheInvalidator />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/explore" component={Explore} />
+        <Route path="/leaderboard" component={Leaderboard} />
+        <Route path="/feed" component={Feed} />
+        <Route path="/products/:id" component={ProductDetail} />
+        <Route path="/sign-in/*?" component={SignInPage} />
+        <Route path="/sign-up/*?" component={SignUpPage} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard/submit" component={SubmitProduct} />
+        <Route component={NotFound} />
+      </Switch>
+    </QueryClientProvider>
   );
 }
 
@@ -135,7 +106,7 @@ function App() {
   return (
     <TooltipProvider>
       <WouterRouter base={basePath}>
-        <ClerkProviderWithRoutes />
+        <Routes />
       </WouterRouter>
       <Toaster />
     </TooltipProvider>
