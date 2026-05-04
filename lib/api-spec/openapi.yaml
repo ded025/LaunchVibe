@@ -18,13 +18,20 @@ tags:
     description: Founder dashboard operations
   - name: ai
     description: AI-powered insights
+  - name: leaderboard
+    description: Leaderboard and rankings
+  - name: feed
+    description: Community activity feed
+  - name: gamification
+    description: Points, badges, and streaks
+  - name: geo
+    description: Geocoding utilities
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -47,7 +54,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [trending, newest, top_rated]
+            enum: [trending, newest, top_rated, score]
         - name: limit
           in: query
           schema:
@@ -97,6 +104,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Product"
+
+  /products/map:
+    get:
+      operationId: getMapProducts
+      tags: [products]
+      summary: Get all products with location data for map display
+      responses:
+        "200":
+          description: Products with location
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MapProduct"
 
   /products/{id}:
     get:
@@ -203,7 +225,7 @@ paths:
     get:
       operationId: getProductStats
       tags: [products]
-      summary: Get product stats (avg rating, feedback counts, would-pay ratio)
+      summary: Get product stats
       parameters:
         - name: id
           in: path
@@ -265,6 +287,135 @@ paths:
                 items:
                   $ref: "#/components/schemas/ProductWithStats"
 
+  /leaderboard/builders:
+    get:
+      operationId: getTopBuilders
+      tags: [leaderboard]
+      summary: Get top founders ranked by product quality and engagement
+      responses:
+        "200":
+          description: Top builders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardBuilder"
+
+  /leaderboard/reviewers:
+    get:
+      operationId: getTopReviewers
+      tags: [leaderboard]
+      summary: Get top reviewers ranked by feedback count
+      responses:
+        "200":
+          description: Top reviewers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardReviewer"
+
+  /leaderboard/products:
+    get:
+      operationId: getTopProducts
+      tags: [leaderboard]
+      summary: Get top products by weighted score
+      responses:
+        "200":
+          description: Top products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /feed:
+    get:
+      operationId: getCommunityFeed
+      tags: [feed]
+      summary: Get community activity feed
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Community feed events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedEventItem"
+
+  /gamification/me:
+    get:
+      operationId: getMyPoints
+      tags: [gamification]
+      summary: Get current user's points, streak, and badges
+      responses:
+        "200":
+          description: User gamification data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGamification"
+
+  /gamification/me/feedback-count:
+    get:
+      operationId: getMyFeedbackCount
+      tags: [gamification]
+      summary: Get number of feedbacks given by current user
+      responses:
+        "200":
+          description: Feedback count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackCount"
+
+  /gamification/checkin:
+    post:
+      operationId: dailyCheckin
+      tags: [gamification]
+      summary: Daily login check-in for streak and points
+      responses:
+        "200":
+          description: Updated gamification data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGamification"
+
+  /geo/search:
+    get:
+      operationId: geocodeSearch
+      tags: [geo]
+      summary: Search for a location and return coordinates
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Geocoding results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeoResult"
+
 components:
   schemas:
     HealthStatus:
@@ -294,10 +445,22 @@ components:
           type: ["string", "null"]
         category:
           type: string
+        city:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
         feedbackCount:
           type: integer
         avgRating:
           type: ["number", "null"]
+        score:
+          type: ["number", "null"]
+        statusTag:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -312,6 +475,30 @@ components:
         - feedbackCount
         - createdAt
         - updatedAt
+
+    MapProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        tagline:
+          type: string
+        city:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - id
+        - name
+        - tagline
+        - latitude
+        - longitude
 
     CreateProductBody:
       type: object
@@ -328,6 +515,14 @@ components:
           type: ["string", "null"]
         category:
           type: string
+        city:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
       required:
         - name
         - tagline
@@ -349,6 +544,14 @@ components:
           type: ["string", "null"]
         category:
           type: string
+        city:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
 
     Feedback:
       type: object
@@ -480,11 +683,26 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ProductWithStats"
+        feedbackOverTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackTimePoint"
       required:
         - totalProducts
         - totalFeedback
         - recentFeedback
         - topProducts
+
+    FeedbackTimePoint:
+      type: object
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+      required:
+        - date
+        - count
 
     FeedbackWithProduct:
       type: object
@@ -531,12 +749,20 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
         feedbackCount:
           type: integer
         avgRating:
           type: ["number", "null"]
         wouldPayRatio:
           type: ["number", "null"]
+        score:
+          type: ["number", "null"]
+        statusTag:
+          type: ["string", "null"]
         createdAt:
           type: string
       required:
@@ -546,3 +772,122 @@ components:
         - category
         - feedbackCount
         - createdAt
+
+    LeaderboardBuilder:
+      type: object
+      properties:
+        userId:
+          type: string
+        productCount:
+          type: integer
+        totalFeedback:
+          type: integer
+        avgRating:
+          type: ["number", "null"]
+        totalPoints:
+          type: integer
+        badges:
+          type: array
+          items:
+            type: string
+        topProduct:
+          type: ["string", "null"]
+      required:
+        - userId
+        - productCount
+        - totalFeedback
+        - totalPoints
+        - badges
+
+    LeaderboardReviewer:
+      type: object
+      properties:
+        userId:
+          type: string
+        feedbackCount:
+          type: integer
+        totalPoints:
+          type: integer
+        badges:
+          type: array
+          items:
+            type: string
+      required:
+        - userId
+        - feedbackCount
+        - totalPoints
+        - badges
+
+    FeedEventItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        productId:
+          type: ["integer", "null"]
+        productName:
+          type: ["string", "null"]
+        userId:
+          type: ["string", "null"]
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - type
+        - createdAt
+
+    UserGamification:
+      type: object
+      properties:
+        userId:
+          type: string
+        points:
+          type: integer
+        streak:
+          type: integer
+        lastActiveDate:
+          type: ["string", "null"]
+        badges:
+          type: array
+          items:
+            type: string
+      required:
+        - userId
+        - points
+        - streak
+        - badges
+
+    FeedbackCount:
+      type: object
+      properties:
+        count:
+          type: integer
+        canListProduct:
+          type: boolean
+      required:
+        - count
+        - canListProduct
+
+    GeoResult:
+      type: object
+      properties:
+        displayName:
+          type: string
+        city:
+          type: ["string", "null"]
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - displayName
+        - country
+        - latitude
+        - longitude

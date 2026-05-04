@@ -20,14 +20,23 @@ import type {
   CreateFeedbackBody,
   CreateProductBody,
   DashboardData,
+  FeedEventItem,
   Feedback,
+  FeedbackCount,
   FeedbackSummary,
+  GeoResult,
+  GeocodeSearchParams,
+  GetCommunityFeedParams,
   HealthStatus,
+  LeaderboardBuilder,
+  LeaderboardReviewer,
   ListProductsParams,
+  MapProduct,
   Product,
   ProductStats,
   ProductWithStats,
   UpdateProductBody,
+  UserGamification,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -40,7 +49,6 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
@@ -362,6 +370,81 @@ export function useGetTrendingProducts<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetTrendingProductsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get all products with location data for map display
+ */
+export const getGetMapProductsUrl = () => {
+  return `/api/products/map`;
+};
+
+export const getMapProducts = async (
+  options?: RequestInit,
+): Promise<MapProduct[]> => {
+  return customFetch<MapProduct[]>(getGetMapProductsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMapProductsQueryKey = () => {
+  return [`/api/products/map`] as const;
+};
+
+export const getGetMapProductsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMapProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMapProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMapProductsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMapProducts>>> = ({
+    signal,
+  }) => getMapProducts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMapProducts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMapProductsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMapProducts>>
+>;
+export type GetMapProductsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all products with location data for map display
+ */
+
+export function useGetMapProducts<
+  TData = Awaited<ReturnType<typeof getMapProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMapProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMapProductsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -803,7 +886,7 @@ export const useSubmitFeedback = <
 };
 
 /**
- * @summary Get product stats (avg rating, feedback counts, would-pay ratio)
+ * @summary Get product stats
  */
 export const getGetProductStatsUrl = (id: number) => {
   return `/api/products/${id}/stats`;
@@ -863,7 +946,7 @@ export type GetProductStatsQueryResult = NonNullable<
 export type GetProductStatsQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get product stats (avg rating, feedback counts, would-pay ratio)
+ * @summary Get product stats
  */
 
 export function useGetProductStats<
@@ -1115,6 +1198,653 @@ export function useGetDashboardProducts<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDashboardProductsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get top founders ranked by product quality and engagement
+ */
+export const getGetTopBuildersUrl = () => {
+  return `/api/leaderboard/builders`;
+};
+
+export const getTopBuilders = async (
+  options?: RequestInit,
+): Promise<LeaderboardBuilder[]> => {
+  return customFetch<LeaderboardBuilder[]>(getGetTopBuildersUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTopBuildersQueryKey = () => {
+  return [`/api/leaderboard/builders`] as const;
+};
+
+export const getGetTopBuildersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTopBuilders>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopBuilders>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTopBuildersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTopBuilders>>> = ({
+    signal,
+  }) => getTopBuilders({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTopBuilders>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTopBuildersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTopBuilders>>
+>;
+export type GetTopBuildersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get top founders ranked by product quality and engagement
+ */
+
+export function useGetTopBuilders<
+  TData = Awaited<ReturnType<typeof getTopBuilders>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopBuilders>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTopBuildersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get top reviewers ranked by feedback count
+ */
+export const getGetTopReviewersUrl = () => {
+  return `/api/leaderboard/reviewers`;
+};
+
+export const getTopReviewers = async (
+  options?: RequestInit,
+): Promise<LeaderboardReviewer[]> => {
+  return customFetch<LeaderboardReviewer[]>(getGetTopReviewersUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTopReviewersQueryKey = () => {
+  return [`/api/leaderboard/reviewers`] as const;
+};
+
+export const getGetTopReviewersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTopReviewers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopReviewers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTopReviewersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTopReviewers>>> = ({
+    signal,
+  }) => getTopReviewers({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTopReviewers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTopReviewersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTopReviewers>>
+>;
+export type GetTopReviewersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get top reviewers ranked by feedback count
+ */
+
+export function useGetTopReviewers<
+  TData = Awaited<ReturnType<typeof getTopReviewers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopReviewers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTopReviewersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get top products by weighted score
+ */
+export const getGetTopProductsUrl = () => {
+  return `/api/leaderboard/products`;
+};
+
+export const getTopProducts = async (
+  options?: RequestInit,
+): Promise<Product[]> => {
+  return customFetch<Product[]>(getGetTopProductsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTopProductsQueryKey = () => {
+  return [`/api/leaderboard/products`] as const;
+};
+
+export const getGetTopProductsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTopProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTopProductsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTopProducts>>> = ({
+    signal,
+  }) => getTopProducts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTopProducts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTopProductsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTopProducts>>
+>;
+export type GetTopProductsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get top products by weighted score
+ */
+
+export function useGetTopProducts<
+  TData = Awaited<ReturnType<typeof getTopProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getTopProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTopProductsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get community activity feed
+ */
+export const getGetCommunityFeedUrl = (params?: GetCommunityFeedParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/feed?${stringifiedParams}`
+    : `/api/feed`;
+};
+
+export const getCommunityFeed = async (
+  params?: GetCommunityFeedParams,
+  options?: RequestInit,
+): Promise<FeedEventItem[]> => {
+  return customFetch<FeedEventItem[]>(getGetCommunityFeedUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCommunityFeedQueryKey = (
+  params?: GetCommunityFeedParams,
+) => {
+  return [`/api/feed`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetCommunityFeedQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCommunityFeed>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetCommunityFeedParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCommunityFeed>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCommunityFeedQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCommunityFeed>>
+  > = ({ signal }) => getCommunityFeed(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCommunityFeed>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCommunityFeedQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCommunityFeed>>
+>;
+export type GetCommunityFeedQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get community activity feed
+ */
+
+export function useGetCommunityFeed<
+  TData = Awaited<ReturnType<typeof getCommunityFeed>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetCommunityFeedParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCommunityFeed>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCommunityFeedQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get current user's points, streak, and badges
+ */
+export const getGetMyPointsUrl = () => {
+  return `/api/gamification/me`;
+};
+
+export const getMyPoints = async (
+  options?: RequestInit,
+): Promise<UserGamification> => {
+  return customFetch<UserGamification>(getGetMyPointsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyPointsQueryKey = () => {
+  return [`/api/gamification/me`] as const;
+};
+
+export const getGetMyPointsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyPoints>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPoints>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyPointsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPoints>>> = ({
+    signal,
+  }) => getMyPoints({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPoints>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyPointsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyPoints>>
+>;
+export type GetMyPointsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get current user's points, streak, and badges
+ */
+
+export function useGetMyPoints<
+  TData = Awaited<ReturnType<typeof getMyPoints>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyPoints>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyPointsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get number of feedbacks given by current user
+ */
+export const getGetMyFeedbackCountUrl = () => {
+  return `/api/gamification/me/feedback-count`;
+};
+
+export const getMyFeedbackCount = async (
+  options?: RequestInit,
+): Promise<FeedbackCount> => {
+  return customFetch<FeedbackCount>(getGetMyFeedbackCountUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyFeedbackCountQueryKey = () => {
+  return [`/api/gamification/me/feedback-count`] as const;
+};
+
+export const getGetMyFeedbackCountQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyFeedbackCount>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyFeedbackCount>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyFeedbackCountQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMyFeedbackCount>>
+  > = ({ signal }) => getMyFeedbackCount({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyFeedbackCount>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyFeedbackCountQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyFeedbackCount>>
+>;
+export type GetMyFeedbackCountQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get number of feedbacks given by current user
+ */
+
+export function useGetMyFeedbackCount<
+  TData = Awaited<ReturnType<typeof getMyFeedbackCount>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyFeedbackCount>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyFeedbackCountQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Daily login check-in for streak and points
+ */
+export const getDailyCheckinUrl = () => {
+  return `/api/gamification/checkin`;
+};
+
+export const dailyCheckin = async (
+  options?: RequestInit,
+): Promise<UserGamification> => {
+  return customFetch<UserGamification>(getDailyCheckinUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getDailyCheckinMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dailyCheckin>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof dailyCheckin>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["dailyCheckin"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof dailyCheckin>>,
+    void
+  > = () => {
+    return dailyCheckin(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DailyCheckinMutationResult = NonNullable<
+  Awaited<ReturnType<typeof dailyCheckin>>
+>;
+
+export type DailyCheckinMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Daily login check-in for streak and points
+ */
+export const useDailyCheckin = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dailyCheckin>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof dailyCheckin>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getDailyCheckinMutationOptions(options));
+};
+
+/**
+ * @summary Search for a location and return coordinates
+ */
+export const getGeocodeSearchUrl = (params: GeocodeSearchParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/geo/search?${stringifiedParams}`
+    : `/api/geo/search`;
+};
+
+export const geocodeSearch = async (
+  params: GeocodeSearchParams,
+  options?: RequestInit,
+): Promise<GeoResult[]> => {
+  return customFetch<GeoResult[]>(getGeocodeSearchUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGeocodeSearchQueryKey = (params?: GeocodeSearchParams) => {
+  return [`/api/geo/search`, ...(params ? [params] : [])] as const;
+};
+
+export const getGeocodeSearchQueryOptions = <
+  TData = Awaited<ReturnType<typeof geocodeSearch>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GeocodeSearchParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof geocodeSearch>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGeocodeSearchQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof geocodeSearch>>> = ({
+    signal,
+  }) => geocodeSearch(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof geocodeSearch>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GeocodeSearchQueryResult = NonNullable<
+  Awaited<ReturnType<typeof geocodeSearch>>
+>;
+export type GeocodeSearchQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Search for a location and return coordinates
+ */
+
+export function useGeocodeSearch<
+  TData = Awaited<ReturnType<typeof geocodeSearch>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GeocodeSearchParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof geocodeSearch>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGeocodeSearchQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

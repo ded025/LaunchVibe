@@ -8,7 +8,6 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -20,7 +19,7 @@ export const HealthCheckResponse = zod.object({
  */
 export const ListProductsQueryParams = zod.object({
   category: zod.coerce.string().optional(),
-  sort: zod.enum(["trending", "newest", "top_rated"]).optional(),
+  sort: zod.enum(["trending", "newest", "top_rated", "score"]).optional(),
   limit: zod.coerce.number().optional(),
   offset: zod.coerce.number().optional(),
 });
@@ -34,8 +33,14 @@ export const ListProductsResponseItem = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
   feedbackCount: zod.number(),
   avgRating: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -51,6 +56,10 @@ export const CreateProductBody = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
 });
 
 /**
@@ -65,14 +74,34 @@ export const GetTrendingProductsResponseItem = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
   feedbackCount: zod.number(),
   avgRating: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
 export const GetTrendingProductsResponse = zod.array(
   GetTrendingProductsResponseItem,
 );
+
+/**
+ * @summary Get all products with location data for map display
+ */
+export const GetMapProductsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  tagline: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number(),
+  longitude: zod.number(),
+});
+export const GetMapProductsResponse = zod.array(GetMapProductsResponseItem);
 
 /**
  * @summary Get a product by ID
@@ -90,8 +119,14 @@ export const GetProductResponse = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
   feedbackCount: zod.number(),
   avgRating: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -110,6 +145,10 @@ export const UpdateProductBody = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string().optional(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
 });
 
 export const UpdateProductResponse = zod.object({
@@ -121,8 +160,14 @@ export const UpdateProductResponse = zod.object({
   websiteUrl: zod.string().nullish(),
   logoUrl: zod.string().nullish(),
   category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
   feedbackCount: zod.number(),
   avgRating: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -172,7 +217,7 @@ export const SubmitFeedbackBody = zod.object({
 });
 
 /**
- * @summary Get product stats (avg rating, feedback counts, would-pay ratio)
+ * @summary Get product stats
  */
 export const GetProductStatsParams = zod.object({
   id: zod.coerce.number(),
@@ -237,12 +282,24 @@ export const GetDashboardResponse = zod.object({
       tagline: zod.string(),
       category: zod.string(),
       logoUrl: zod.string().nullish(),
+      city: zod.string().nullish(),
+      country: zod.string().nullish(),
       feedbackCount: zod.number(),
       avgRating: zod.number().nullish(),
       wouldPayRatio: zod.number().nullish(),
+      score: zod.number().nullish(),
+      statusTag: zod.string().nullish(),
       createdAt: zod.string(),
     }),
   ),
+  feedbackOverTime: zod
+    .array(
+      zod.object({
+        date: zod.string(),
+        count: zod.number(),
+      }),
+    )
+    .optional(),
 });
 
 /**
@@ -254,11 +311,130 @@ export const GetDashboardProductsResponseItem = zod.object({
   tagline: zod.string(),
   category: zod.string(),
   logoUrl: zod.string().nullish(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
   feedbackCount: zod.number(),
   avgRating: zod.number().nullish(),
   wouldPayRatio: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
   createdAt: zod.string(),
 });
 export const GetDashboardProductsResponse = zod.array(
   GetDashboardProductsResponseItem,
 );
+
+/**
+ * @summary Get top founders ranked by product quality and engagement
+ */
+export const GetTopBuildersResponseItem = zod.object({
+  userId: zod.string(),
+  productCount: zod.number(),
+  totalFeedback: zod.number(),
+  avgRating: zod.number().nullish(),
+  totalPoints: zod.number(),
+  badges: zod.array(zod.string()),
+  topProduct: zod.string().nullish(),
+});
+export const GetTopBuildersResponse = zod.array(GetTopBuildersResponseItem);
+
+/**
+ * @summary Get top reviewers ranked by feedback count
+ */
+export const GetTopReviewersResponseItem = zod.object({
+  userId: zod.string(),
+  feedbackCount: zod.number(),
+  totalPoints: zod.number(),
+  badges: zod.array(zod.string()),
+});
+export const GetTopReviewersResponse = zod.array(GetTopReviewersResponseItem);
+
+/**
+ * @summary Get top products by weighted score
+ */
+export const GetTopProductsResponseItem = zod.object({
+  id: zod.number(),
+  founderClerkId: zod.string(),
+  name: zod.string(),
+  tagline: zod.string(),
+  description: zod.string(),
+  websiteUrl: zod.string().nullish(),
+  logoUrl: zod.string().nullish(),
+  category: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string().nullish(),
+  latitude: zod.number().nullish(),
+  longitude: zod.number().nullish(),
+  feedbackCount: zod.number(),
+  avgRating: zod.number().nullish(),
+  score: zod.number().nullish(),
+  statusTag: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+export const GetTopProductsResponse = zod.array(GetTopProductsResponseItem);
+
+/**
+ * @summary Get community activity feed
+ */
+export const GetCommunityFeedQueryParams = zod.object({
+  limit: zod.coerce.number().optional(),
+  offset: zod.coerce.number().optional(),
+});
+
+export const GetCommunityFeedResponseItem = zod.object({
+  id: zod.number(),
+  type: zod.string(),
+  productId: zod.number().nullish(),
+  productName: zod.string().nullish(),
+  userId: zod.string().nullish(),
+  metadata: zod.record(zod.string(), zod.unknown()).optional(),
+  createdAt: zod.string(),
+});
+export const GetCommunityFeedResponse = zod.array(GetCommunityFeedResponseItem);
+
+/**
+ * @summary Get current user's points, streak, and badges
+ */
+export const GetMyPointsResponse = zod.object({
+  userId: zod.string(),
+  points: zod.number(),
+  streak: zod.number(),
+  lastActiveDate: zod.string().nullish(),
+  badges: zod.array(zod.string()),
+});
+
+/**
+ * @summary Get number of feedbacks given by current user
+ */
+export const GetMyFeedbackCountResponse = zod.object({
+  count: zod.number(),
+  canListProduct: zod.boolean(),
+});
+
+/**
+ * @summary Daily login check-in for streak and points
+ */
+export const DailyCheckinResponse = zod.object({
+  userId: zod.string(),
+  points: zod.number(),
+  streak: zod.number(),
+  lastActiveDate: zod.string().nullish(),
+  badges: zod.array(zod.string()),
+});
+
+/**
+ * @summary Search for a location and return coordinates
+ */
+export const GeocodeSearchQueryParams = zod.object({
+  q: zod.coerce.string(),
+});
+
+export const GeocodeSearchResponseItem = zod.object({
+  displayName: zod.string(),
+  city: zod.string().nullish(),
+  country: zod.string(),
+  latitude: zod.number(),
+  longitude: zod.number(),
+});
+export const GeocodeSearchResponse = zod.array(GeocodeSearchResponseItem);

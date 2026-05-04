@@ -7,12 +7,8 @@ const router: IRouter = Router();
 
 const requireAuth = (req: any, res: any, next: any) => {
   const auth = getAuth(req);
-  const userId = auth?.userId;
-  if (!userId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  req.userId = userId;
+  if (!auth?.userId) { res.status(401).json({ error: "Unauthorized" }); return; }
+  req.userId = auth.userId;
   next();
 };
 
@@ -20,32 +16,26 @@ const requireAuth = (req: any, res: any, next: any) => {
 router.get("/dashboard", requireAuth, async (req: any, res): Promise<void> => {
   const userId = req.userId as string;
 
-  const products = await db
-    .select()
-    .from(productsTable)
-    .where(eq(productsTable.founderClerkId, userId));
-
+  const products = await db.select().from(productsTable).where(eq(productsTable.founderClerkId, userId));
   const productIds = products.map((p) => p.id);
 
   let totalFeedback = 0;
   let avgRating: number | null = null;
   let recentFeedback: any[] = [];
+  let feedbackOverTime: { date: string; count: number }[] = [];
 
   if (productIds.length > 0) {
-    const statsResult = await db
-      .select({
-        totalFeedback: count(),
-        avgRating: avg(feedbackTable.rating),
-      })
+    const idsSQL = sql`ARRAY[${sql.join(productIds.map(id => sql`${id}`), sql`, `)}]::int[]`;
+
+    const [statsResult] = await db
+      .select({ totalFeedback: count(), avgRating: avg(feedbackTable.rating) })
       .from(feedbackTable)
-      .where(sql`${feedbackTable.productId} = ANY(ARRAY[${sql.join(productIds.map(id => sql`${id}`), sql`, `)}]::int[])`);
+      .where(sql`${feedbackTable.productId} = ANY(${idsSQL})`);
 
-    totalFeedback = statsResult[0]?.totalFeedback ?? 0;
-    avgRating = statsResult[0]?.avgRating
-      ? parseFloat(statsResult[0].avgRating as unknown as string)
-      : null;
+    totalFeedback = statsResult?.totalFeedback ?? 0;
+    avgRating = statsResult?.avgRating ? parseFloat(statsResult.avgRating as unknown as string) : null;
 
-    const recentFeedbackRaw = await db
+    recentFeedback = await db
       .select({
         id: feedbackTable.id,
         productId: feedbackTable.productId,
@@ -59,15 +49,26 @@ router.get("/dashboard", requireAuth, async (req: any, res): Promise<void> => {
       })
       .from(feedbackTable)
       .innerJoin(productsTable, eq(feedbackTable.productId, productsTable.id))
-      .where(sql`${feedbackTable.productId} = ANY(ARRAY[${sql.join(productIds.map(id => sql`${id}`), sql`, `)}]::int[])`)
+      .where(sql`${feedbackTable.productId} = ANY(${idsSQL})`)
       .orderBy(desc(feedbackTable.createdAt))
       .limit(10);
 
-    recentFeedback = recentFeedbackRaw;
+    // Feedback over time (last 30 days by day)
+    const rawTimeSeries = await db
+      .select({
+        date: sql<string>`DATE(${feedbackTable.createdAt})::text`,
+        count: count(),
+      })
+      .from(feedbackTable)
+      .where(sql`${feedbackTable.productId} = ANY(${idsSQL}) AND ${feedbackTable.createdAt} > NOW() - INTERVAL '30 days'`)
+      .groupBy(sql`DATE(${feedbackTable.createdAt})`)
+      .orderBy(sql`DATE(${feedbackTable.createdAt})`);
+
+    feedbackOverTime = rawTimeSeries;
   }
 
   const topProducts = products
-    .sort((a, b) => b.feedbackCount - a.feedbackCount)
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .slice(0, 5)
     .map((p) => ({
       id: p.id,
@@ -75,19 +76,17 @@ router.get("/dashboard", requireAuth, async (req: any, res): Promise<void> => {
       tagline: p.tagline,
       category: p.category,
       logoUrl: p.logoUrl,
+      city: p.city,
+      country: p.country,
       feedbackCount: p.feedbackCount,
       avgRating: p.avgRating,
       wouldPayRatio: null,
+      score: p.score,
+      statusTag: p.statusTag,
       createdAt: p.createdAt.toISOString(),
     }));
 
-  res.json({
-    totalProducts: products.length,
-    totalFeedback,
-    avgRating,
-    recentFeedback,
-    topProducts,
-  });
+  res.json({ totalProducts: products.length, totalFeedback, avgRating, recentFeedback, topProducts, feedbackOverTime });
 });
 
 // GET /dashboard/products
@@ -103,14 +102,11 @@ router.get("/dashboard/products", requireAuth, async (req: any, res): Promise<vo
   const enriched = await Promise.all(
     products.map(async (p) => {
       const [stats] = await db
-        .select({
-          wouldPayCount: count(),
-        })
+        .select({ wouldPayCount: count() })
         .from(feedbackTable)
         .where(sql`${feedbackTable.productId} = ${p.id} AND ${feedbackTable.wouldPay} = true`);
 
-      const wouldPayRatio =
-        p.feedbackCount > 0 ? (stats?.wouldPayCount ?? 0) / p.feedbackCount : null;
+      const wouldPayRatio = p.feedbackCount > 0 ? (stats?.wouldPayCount ?? 0) / p.feedbackCount : null;
 
       return {
         id: p.id,
@@ -118,9 +114,13 @@ router.get("/dashboard/products", requireAuth, async (req: any, res): Promise<vo
         tagline: p.tagline,
         category: p.category,
         logoUrl: p.logoUrl,
+        city: p.city,
+        country: p.country,
         feedbackCount: p.feedbackCount,
         avgRating: p.avgRating,
         wouldPayRatio,
+        score: p.score,
+        statusTag: p.statusTag,
         createdAt: p.createdAt.toISOString(),
       };
     })

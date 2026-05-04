@@ -20,11 +20,35 @@ export interface Product {
   /** @nullable */
   logoUrl?: string | null;
   category: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
   feedbackCount: number;
   /** @nullable */
   avgRating?: number | null;
+  /** @nullable */
+  score?: number | null;
+  /** @nullable */
+  statusTag?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface MapProduct {
+  id: number;
+  name: string;
+  tagline: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  latitude: number;
+  longitude: number;
 }
 
 export interface CreateProductBody {
@@ -36,6 +60,14 @@ export interface CreateProductBody {
   /** @nullable */
   logoUrl?: string | null;
   category: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
 }
 
 export interface UpdateProductBody {
@@ -47,6 +79,14 @@ export interface UpdateProductBody {
   /** @nullable */
   logoUrl?: string | null;
   category?: string;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
 }
 
 export interface Feedback {
@@ -114,12 +154,25 @@ export interface ProductWithStats {
   category: string;
   /** @nullable */
   logoUrl?: string | null;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  country?: string | null;
   feedbackCount: number;
   /** @nullable */
   avgRating?: number | null;
   /** @nullable */
   wouldPayRatio?: number | null;
+  /** @nullable */
+  score?: number | null;
+  /** @nullable */
+  statusTag?: string | null;
   createdAt: string;
+}
+
+export interface FeedbackTimePoint {
+  date: string;
+  count: number;
 }
 
 export interface DashboardData {
@@ -129,6 +182,64 @@ export interface DashboardData {
   avgRating?: number | null;
   recentFeedback: FeedbackWithProduct[];
   topProducts: ProductWithStats[];
+  feedbackOverTime?: FeedbackTimePoint[];
+}
+
+export interface LeaderboardBuilder {
+  userId: string;
+  productCount: number;
+  totalFeedback: number;
+  /** @nullable */
+  avgRating?: number | null;
+  totalPoints: number;
+  badges: string[];
+  /** @nullable */
+  topProduct?: string | null;
+}
+
+export interface LeaderboardReviewer {
+  userId: string;
+  feedbackCount: number;
+  totalPoints: number;
+  badges: string[];
+}
+
+export type FeedEventItemMetadata = { [key: string]: unknown };
+
+export interface FeedEventItem {
+  id: number;
+  type: string;
+  /** @nullable */
+  productId?: number | null;
+  /** @nullable */
+  productName?: string | null;
+  /** @nullable */
+  userId?: string | null;
+  metadata?: FeedEventItemMetadata;
+  createdAt: string;
+}
+
+export interface UserGamification {
+  userId: string;
+  points: number;
+  streak: number;
+  /** @nullable */
+  lastActiveDate?: string | null;
+  badges: string[];
+}
+
+export interface FeedbackCount {
+  count: number;
+  canListProduct: boolean;
+}
+
+export interface GeoResult {
+  displayName: string;
+  /** @nullable */
+  city?: string | null;
+  country: string;
+  latitude: number;
+  longitude: number;
 }
 
 export type ListProductsParams = {
@@ -145,4 +256,14 @@ export const ListProductsSort = {
   trending: "trending",
   newest: "newest",
   top_rated: "top_rated",
+  score: "score",
 } as const;
+
+export type GetCommunityFeedParams = {
+  limit?: number;
+  offset?: number;
+};
+
+export type GeocodeSearchParams = {
+  q: string;
+};

@@ -12,6 +12,8 @@ import Explore from "@/pages/explore";
 import ProductDetail from "@/pages/product-detail";
 import Dashboard from "@/pages/dashboard";
 import SubmitProduct from "@/pages/submit-product";
+import Leaderboard from "@/pages/leaderboard";
+import Feed from "@/pages/feed";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -124,6 +126,8 @@ function ClerkProviderWithRoutes() {
         <Switch>
           <Route path="/" component={HomeRedirect} />
           <Route path="/explore" component={Explore} />
+          <Route path="/leaderboard" component={Leaderboard} />
+          <Route path="/feed" component={Feed} />
           <Route path="/products/:id" component={ProductDetail} />
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
